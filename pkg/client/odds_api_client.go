@@ -3,8 +3,11 @@ package client
 import (
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/goccy/go-json"
+	"github.com/jtyrus/the-odds-api-go/pkg/common"
+	"github.com/jtyrus/the-odds-api-go/pkg/common/scores"
 	"github.com/jtyrus/the-odds-api-go/pkg/odds"
 )
 
@@ -61,4 +64,33 @@ func (client *OddsClient) GetEventOdds(request odds.EventRequest) ([]odds.Event,
 	}
 
 	return oddsEvents, nil
+}
+
+func (client *OddsClient) GetScores(request odds.ScoresRequest) (*scores.ScoreResponse, error) {
+	url := host + odds.BuildScoresUrlFromRequest(request, client.ApiKey)
+	
+	resp, err  := client.HttpClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var currScores []scores.Score
+	err = json.Unmarshal(body, &currScores)
+	if err != nil {
+		return nil, err
+	}
+
+	used, _ := strconv.ParseInt(resp.Header.Get("x-requests-used"))
+	remaining, _ := strconv.ParseInt(resp.Header.Get("x-requests-remaining"))
+	quota := common.Quota { 
+		Remaining: int(remaining),
+	 	Used: int(used),
+	}
+
+	return &scores.ScoreResponse{Scores: currScores, Quota: quota}, nil
 }

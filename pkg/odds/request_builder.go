@@ -31,6 +31,13 @@ type OddsRequest struct {
 	OddsFormat common.OddsFormat //Default decimal
 }
 
+type ScoresRequest struct {
+	DateFormat common.DateFormat //Format of returned timestamps. Can be iso (ISO8601) or unix timestamp (seconds since epoch). Default iso
+	DaysFrom int //The number of days in the past from which to return completed events. Valid values are integers from 1 to 3. If this field is missing, only live and upcoming events are returned.
+	EventIds []string //filters for specific events
+	Sport sports.Sport
+}
+
 func BuildOddsUrlFromRequest(request OddsRequest, apiKey string) string {
 	regionsString := ""
 	for i := 0; i < len(request.Regions) - 1; i++ {
@@ -53,6 +60,16 @@ func BuildOddsUrlFromRequest(request OddsRequest, apiKey string) string {
 func BuildsEventsUrlFromRequest(request EventRequest, apiKey string) string {
 	url := fmt.Sprintf("/sports/%s/events?apiKey=%s", request.Sport.Key, apiKey)
 	url += getDates(request.DateFormat, request.TimeFrom, request.TimeTo)
+	if request.EventIds != nil && len(request.EventIds) > 0 {
+		url += "&eventIds=" + strings.Join(request.EventIds, ",")
+	}
+
+	return url
+}
+
+func BuildScoresUrlFromRequest(request ScoresRequest, apiKey string) string {
+	url := fmt.Sprintf("/sports/%s/scores?apiKey=%s", request.Sport.Key, apiKey)
+	url += getDates(request.DateFormat, time.UnixMicro(0), time.UnixMicro(0))
 	if request.EventIds != nil && len(request.EventIds) > 0 {
 		url += "&eventIds=" + strings.Join(request.EventIds, ",")
 	}
