@@ -85,8 +85,12 @@ func (client *OddsClient) GetScores(request odds.ScoresRequest) (*scores.ScoreRe
 		return nil, err
 	}
 
-	used, _ := strconv.ParseInt(resp.Header.Get("x-requests-used"))
-	remaining, _ := strconv.ParseInt(resp.Header.Get("x-requests-remaining"))
+	used, err := strconv.Atoi(resp.Header.Get("x-requests-used"))
+	if err != nil { return nil, err }
+
+	remaining, err := strconv.Atoi(resp.Header.Get("x-requests-remaining"))
+	if err != nil { return nil, err }
+	
 	quota := common.Quota { 
 		Remaining: int(remaining),
 	 	Used: int(used),
