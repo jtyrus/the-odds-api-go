@@ -15,3 +15,15 @@ const (
 	Decimal  OddsFormat = "decimal"
 	American OddsFormat = "american"
 )
+
+type DateFormat string
+
+const (
+	Iso  string = "iso"
+	Unix string = "unix"
+)
+
+type Quota struct {
+	Remaining int
+	Used      int
+}

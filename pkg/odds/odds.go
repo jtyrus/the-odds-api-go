@@ -1,5 +1,12 @@
 package odds
 
+type OddsResponse struct {
+	Timestamp         string  `json:"timestamp"`
+	PreviousTimestamp string  `json:"previous_timestamp"`
+	NextTimestamp     string  `json:"next_timestamp"`
+	Events            []Event `json:"data"`
+}
+
 // List of events is returned by the /odds endpoints
 type Event struct {
 	Id           string      `json:"id"`
